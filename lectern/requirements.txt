@@ -1,0 +1,6 @@
+PySide6>=6.7
+requests>=2.28
+numpy>=1.24
+openvino>=2025.0
+openvino-genai>=2025.0
+huggingface_hub>=0.20
