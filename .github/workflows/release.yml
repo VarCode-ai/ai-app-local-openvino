@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to build, e.g. v1.0.0"
+        description: "Existing tag to build, e.g. v1.0.0 (1.0.0 works too)"
         required: true
 
 permissions:
@@ -24,14 +24,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Resolve the tag
+        run: |
+          TAG="${TAG#refs/tags/}"
+          [[ "$TAG" == v* ]] || TAG="v$TAG"   # accept "1.0.0" typed by hand
+          git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || {
+            echo "::error::Tag $TAG does not exist. Existing tags: $(git tag | tr '\n' ' ')"; exit 1; }
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+
       - name: Build the AppImages from the tag
         # the build script of this checkout builds the sources of the tag, so older tags can be rebuilt too
         run: |
-          git worktree add --detach "$RUNNER_TEMP/src" "$TAG"
-          packaging/build-appimage.sh --source "$RUNNER_TEMP/src" --out dist
+          git worktree add --detach "$RUNNER_TEMP/src" "refs/tags/$TAG"
+          bash packaging/build-appimage.sh --source "$RUNNER_TEMP/src" --out dist
 
       - name: Smoke test
         run: |
+          chmod +x dist/*.AppImage
           ./dist/Lectern-*-x86_64.AppImage --appimage-extract-and-run transcribe --help > /dev/null
           echo "lectern-transcribe inside the AppImage works"
 
