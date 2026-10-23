@@ -79,12 +79,6 @@ Buttons such as *Open on Hugging Face* or *Open WebUI* simply open your web brow
 - **Open from top to bottom.** The apps depend only on open source software: OpenVINO and OpenVINO Model
   Server (Apache 2.0), Qt for Python (LGPL), Silero VAD (MIT), and the Inter and Newsreader fonts (OFL).
   The Whisper models are open-weight (MIT).
-- **Verifiable, not just promised.** Every claim on this page can be checked in a few files:
-  - [`common/ui_kit.py`](common/ui_kit.py), `UpdateChecker`: the update check;
-  - [`ovms-manager/ovms_manager.py`](ovms-manager/ovms_manager.py), `hf_get` and `NO_TELEMETRY_ENV`: the
-    catalog and the conversion;
-  - [`lectern/lectern.py`](lectern/lectern.py), `SileroVAD`: the voice detection download;
-  - [`lectern/transcribe.py`](lectern/transcribe.py), `resolve_model`: the model download.
 - **Built in the open.** Every change runs the public checks in GitHub Actions. Issues, translations and pull
   requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -116,26 +110,6 @@ sidebar of OVMS Manager. The change applies the next time you start the app.
 
 Translations are plain JSON files in each app's `locale/` folder, so adding a language does not need any
 tool: see [CONTRIBUTING.md](CONTRIBUTING.md#translations).
-
-### Design
-
-The interface follows the direction designers and product teams set for 2026–2027: calm, local, accessible.
-
-- **Light and dark theme** that follow the system and switch live. You can force either one: **Tools →
-  Appearance** in Lectern, the theme menu in the sidebar of OVMS Manager.
-- **Calm layout**: warm neutral colors, a sidebar that recedes, few borders. Depth is used only for what
-  floats, such as Lectern's recorder dock and the command palette.
-- **Command palette** (**Ctrl+K**) in both apps: every action, every lecture and every local model is one
-  search away.
-- **Visible provenance**: Lectern shows where the transcription runs (*Local · GPU*, updated if it falls back
-  to the CPU), and a live waveform shows when it hears speech. OVMS Manager tells you whether a model fits in
-  your RAM before you download it.
-- **Typography**: [Inter](https://rsms.me/inter/) for the interface, with tabular figures for clocks and
-  tables, and [Newsreader](https://github.com/productiontype/Newsreader) as an optional serif for reading
-  transcripts. Both fonts are bundled, so the apps look the same on every distribution.
-- **Accessibility**: every text and focus color reaches the WCAG 2.2 AA contrast ratios in both themes
-  (checked by `tools/check_contrast.py`), focus rings are visible, and **Reduce motion** turns off the
-  animations. It follows GNOME's setting by default.
 
 ## Requirements
 
@@ -193,17 +167,6 @@ need root, and it runs on any x86-64 distribution with glibc 2.34 or newer, the 
 Debian 12, Ubuntu 22.04, Fedora 35, RHEL/Alma/Rocky 9, openSUSE Tumbleweed, Arch and newer. To verify the
 download, compare it with `SHA256SUMS` from the same release (`sha256sum -c SHA256SUMS --ignore-missing`).
 
-- **Menu entry**: an AppImage does not add itself to the application menu. Use
-  [Gear Lever](https://flathub.org/apps/it.mijorus.gearlever) or
-  [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) to integrate it, or the installers
-  below.
-- **What it still needs from your system**: the same things as the installers do. That is Podman or Docker
-  for OVMS Manager; `ffmpeg` and, for the GPU, the Intel compute runtime for Lectern; and `libxcb-cursor` on
-  X11 sessions (see [System packages](#system-packages-by-distribution)).
-- **The OVMS Manager Converter** is not included, because PyTorch alone would weigh several GB. Use the
-  installer with `--with-optimum` for it.
-- If your system cannot mount AppImages (FUSE missing, e.g. in some containers), run them with
-  `--appimage-extract-and-run`.
 - **Updating**: when the update banner appears, download the new AppImage and delete the old one. Your
   notes, models and settings are kept.
 
