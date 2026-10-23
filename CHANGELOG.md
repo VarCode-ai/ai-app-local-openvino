@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [semantic versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Privacy
+
+- The apps switch off the optional usage statistics of the libraries they run. For Hugging Face downloads
+  in Lectern, lectern-transcribe and the Converter they set `HF_HUB_DISABLE_TELEMETRY` and `DO_NOT_TRACK`.
+  For OpenVINO's model conversion in the Converter, which otherwise sends anonymous statistics unless you
+  opted out, they decline them for that process.
+
+### Documentation
+
+- New README section "Open source and private by design", with every network connection the apps make.
+
 ## [1.0.0] — 2026-10-23
 
 First public release.
@@ -40,4 +53,5 @@ First public release.
 - Automatic fallback from GPU or NPU to the CPU when an accelerator cannot be used.
 - Update notifications based on the GitHub releases: checked at most once a day, and they can be turned off.
 
+[Unreleased]: https://github.com/VarCode-ai/ai-app-local-openvino/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/VarCode-ai/ai-app-local-openvino/releases/tag/v1.0.0

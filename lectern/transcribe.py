@@ -20,6 +20,10 @@ import subprocess
 import sys
 import time
 
+# No usage statistics from the libraries either: Hugging Face downloads honor these switches (also for lectern.py)
+os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
+os.environ.setdefault("DO_NOT_TRACK", "1")
+
 # ================= DEFAULTS =================
 # Folder holding the OpenVINO models (shared with OVMS Manager). Override with $OPENVINO_MODELS_DIR.
 MODELS_DIR = os.path.abspath(os.path.expanduser(os.environ.get("OPENVINO_MODELS_DIR") or "~/models"))

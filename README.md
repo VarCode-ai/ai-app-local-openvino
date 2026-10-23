@@ -8,6 +8,11 @@ Desktop apps for Linux that run AI models **entirely on your own computer** with
 [Intel OpenVINO](https://github.com/openvinotoolkit/openvino): no cloud services, no accounts, and your
 audio and text never leave the machine.
 
+> 🔒 **Private by design**: no cloud, no accounts, no telemetry, and it works offline.
+>
+> 🧡 **Free and open source**: GPL-3.0, built only on open source software, and every privacy claim can be
+> checked in the code. [Read how →](#open-source-and-private-by-design)
+
 ## Why this project
 
 Recent Intel processors include an NPU (the *AI Boost* in Core Ultra chips) and a capable integrated GPU,
@@ -26,6 +31,62 @@ It is also meant to grow into an **ecosystem of AI apps** built on the same arch
 - Every app is a **PySide6 desktop app** with a per-user installer that needs no root access.
 
 **Lectern** is the first app of the ecosystem. More apps, all based on AI, will follow.
+
+## Open source and private by design
+
+AI assistants usually work by sending your voice, your documents and your questions to someone else's
+servers. These apps take the opposite approach: **the AI comes to your computer, your data does not go
+anywhere.**
+
+### Private by design
+
+- **Everything runs locally.** Lectern transcribes your microphone and files on your CPU, GPU or NPU.
+  The models served by OVMS Manager answer from your own machine. Recordings, transcripts, prompts and
+  answers never leave your computer.
+- **No accounts, no API keys, no subscriptions.** There is nothing to sign up for, and no usage limit
+  other than your hardware.
+- **No telemetry.** The apps collect no usage statistics, analytics or crash reports. They also switch off
+  the optional usage statistics of the libraries they run: Hugging Face downloads
+  (`HF_HUB_DISABLE_TELEMETRY`, `DO_NOT_TRACK`) and OpenVINO's model conversion in the Converter.
+- **Works offline.** Once the models are downloaded, transcription and inference need no connection at
+  all.
+- **Your data stays yours.** Notes are plain text files in folders you choose: no database, no
+  proprietary format, no lock-in. Uninstalling an app never deletes your notes, models or settings.
+- **Recordings are local too.** If you choose to save the audio of a lecture, it is a `.wav` file in the
+  lecture folder, nowhere else.
+
+#### Every network connection, listed
+
+The apps connect to the internet only in these cases. Each request reveals your IP address and a software
+name, as any HTTP request does; none of them carries your audio, your text or anything that identifies you.
+
+| When | Where | What for | What is sent | Can you avoid it? |
+| --- | --- | --- | --- | --- |
+| You open *Explore Hugging Face* (OVMS Manager) | huggingface.co | List of OpenVINO models | Your search text, if any | Yes: the catalog is cached for 6 hours and offline the cache is used |
+| You download a model | huggingface.co | Model files | The model name | No: it is the download you asked for |
+| You start the server or download for the first time | docker.io | The OpenVINO Model Server container image | The image name | No, but only once |
+| First recording in Lectern | raw.githubusercontent.com | Silero voice detection model (1.3 MB) | Nothing | Yes: offline, Lectern uses a simpler volume-based detection |
+| At most once a day | api.github.com | Is there a newer release? | Nothing | Yes: **Help → Check for updates automatically** in Lectern, the command palette in OVMS Manager |
+| You run the Converter | huggingface.co | The original model to convert | The model name | No: it is the conversion you asked for |
+
+Buttons such as *Open on Hugging Face* or *Open WebUI* simply open your web browser.
+
+### Free and open source
+
+- **GPL-3.0-or-later.** You are free to use the apps for any purpose, study how they work, change them and
+  share them. Copyleft guarantees that every version based on this code stays free and open as well: these
+  apps can never be turned into a closed product.
+- **Open from top to bottom.** The apps depend only on open source software: OpenVINO and OpenVINO Model
+  Server (Apache 2.0), Qt for Python (LGPL), Silero VAD (MIT), and the Inter and Newsreader fonts (OFL).
+  The Whisper models are open-weight (MIT).
+- **Verifiable, not just promised.** Every claim on this page can be checked in a few files:
+  - [`common/ui_kit.py`](common/ui_kit.py), `UpdateChecker`: the update check;
+  - [`ovms-manager/ovms_manager.py`](ovms-manager/ovms_manager.py), `hf_get` and `NO_TELEMETRY_ENV`: the
+    catalog and the conversion;
+  - [`lectern/lectern.py`](lectern/lectern.py), `SileroVAD`: the voice detection download;
+  - [`lectern/transcribe.py`](lectern/transcribe.py), `resolve_model`: the model download.
+- **Built in the open.** Every change runs the public checks in GitHub Actions. Issues, translations and pull
+  requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Apps
 
@@ -174,18 +235,20 @@ Models are stored in `~/models`, a folder shared by both apps.
 The apps follow the XDG base directories: settings go in `~/.config`, caches and logs in `~/.cache`, and
 the installed apps in `~/.local/share`.
 
-## Privacy and security
+## Security notes
 
-- Transcription and inference run locally. The apps connect to the network only to read the Hugging Face
-  catalog, to download models, the OVMS container image and, once, the Silero voice detection model
-  (about 1.3 MB from GitHub). At most once a day they also ask GitHub for the latest release, to tell you
-  about updates. Nothing is sent but the request itself. To turn it off, use **Help → Check for updates
-  automatically** in Lectern, or *Turn automatic update checks off* in the command palette of OVMS Manager.
+Privacy is covered in [Open source and private by design](#open-source-and-private-by-design). A few
+things to keep in mind:
+
 - The OVMS API has **no authentication**. By default the container publishes port 8000 on every network
   interface, so a containerized Open WebUI can reach it. On untrusted networks, enable **Localhost only**
   on the Server page or block the port with your firewall.
 - **Allow custom code** (`--trust-remote-code`) in the Converter runs Python code from the model
   repository on your computer. Enable it only for repositories you trust.
+- Models come from their authors on Hugging Face. Prefer the official `OpenVINO/` repositories, which
+  OVMS Manager marks with ✓.
+- To opt out of OpenVINO's usage statistics for every OpenVINO tool on your system, not only inside these
+  apps, run `opt_in_out --opt_out` once.
 
 ## Repository layout
 

@@ -195,6 +195,11 @@ def optimum_command(args):
 
 NAV_PAGES = (N_("Server"), N_("Explore Hugging Face"), N_("Local library"), N_("Converter"))
 
+# The converter runs third-party tools with optional usage statistics: switch them off. Hugging Face honors
+# HF_HUB_DISABLE_TELEMETRY / DO_NOT_TRACK; OpenVINO's model conversion sends anonymous statistics unless the user
+# opted out or it runs in CI (openvino_telemetry's disable_in_ci), so CI=true declines them for this process only.
+NO_TELEMETRY_ENV = {**os.environ, "HF_HUB_DISABLE_TELEMETRY": "1", "DO_NOT_TRACK": "1", "CI": "true"}
+
 HARDWARE_MODES = {
     "GPU": {
         "title": N_("Intel GPU"), "icon": "gpu", "desc": N_("Fastest generation"),
@@ -603,13 +608,14 @@ class Task(QThread):
     def log(self, text, level="info"):
         self.line.emit(text, level)
 
-    def run_cmd(self, cmd, display=None):
+    def run_cmd(self, cmd, display=None, env=None):
         """Run cmd showing its output in the console; `display` replaces the command shown in the log.
         The last lines stay in self.output_tail to recognize known errors."""
         self.log("$ " + (display or " ".join(cmd)), "cmd")
         self.output_tail = []
         try:
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+                                    env=env)
         except FileNotFoundError:
             self.log(tr("Command not found: {command}").format(command=cmd[0]), "err")
             return 127
@@ -2335,7 +2341,7 @@ class OVMSManager(QMainWindow):
             if trust:
                 t.log(tr("Custom code from the repository allowed (--trust-remote-code)."), "warn")
             t.log(f"Python: {cmd[0]}")
-            ret = t.run_cmd(cmd, display="optimum-cli " + " ".join(cli_args))
+            ret = t.run_cmd(cmd, display="optimum-cli " + " ".join(cli_args), env=NO_TELEMETRY_ENV)
             if ret == 0:
                 t.log(tr("Conversion completed successfully!"), "ok")
                 return
