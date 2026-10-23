@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Downloads
+
+- AppImages of both apps: one file each, with Python, Qt and OpenVINO inside, for any x86-64 distribution
+  with glibc 2.34 or newer. The Lectern AppImage also runs `lectern-transcribe` (`… transcribe -i <folder>`).
+- A *Release binaries* workflow builds them for every tag and attaches them to the GitHub release.
+
 ### Privacy
 
 - The apps switch off the optional usage statistics of the libraries they run. For Hugging Face downloads

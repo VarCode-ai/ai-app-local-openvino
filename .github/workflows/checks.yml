@@ -27,7 +27,7 @@ jobs:
           python -m pyflakes common/*.py ovms-manager/*.py lectern/*.py tools/*.py
 
       - name: Shell scripts
-        run: shellcheck ovms-manager/*.sh lectern/*.sh
+        run: shellcheck ovms-manager/*.sh lectern/*.sh packaging/*.sh packaging/AppRun
 
       - name: Translations are complete
         run: python tools/check_translations.py

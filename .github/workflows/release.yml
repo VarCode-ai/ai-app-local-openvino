@@ -1,0 +1,44 @@
+name: Release binaries
+
+# Builds the AppImages of both apps and attaches them to the GitHub release of the tag.
+# Runs on every pushed tag "v*"; it can also be started by hand for an existing tag (Actions → Run workflow).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build, e.g. v1.0.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  appimages:
+    runs-on: ubuntu-22.04
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build the AppImages from the tag
+        # the build script of this checkout builds the sources of the tag, so older tags can be rebuilt too
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/src" "$TAG"
+          packaging/build-appimage.sh --source "$RUNNER_TEMP/src" --out dist
+
+      - name: Smoke test
+        run: |
+          ./dist/Lectern-*-x86_64.AppImage --appimage-extract-and-run transcribe --help > /dev/null
+          echo "lectern-transcribe inside the AppImage works"
+
+      - name: Attach them to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" > /dev/null 2>&1 || \
+            gh release create "$TAG" --title "${TAG#v}" --notes "See [CHANGELOG.md](CHANGELOG.md) for the changes."
+          gh release upload "$TAG" dist/*.AppImage dist/SHA256SUMS --clobber

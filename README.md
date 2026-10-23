@@ -174,6 +174,41 @@ sessions, but installing it costs nothing.
 
 ## Quick start
 
+There are two ways to get the apps: a ready-made **AppImage**, one file to download and run, or the
+**installers**, which build them from source on your machine.
+
+### Option 1: download the AppImage
+
+From the [latest release](https://github.com/VarCode-ai/ai-app-local-openvino/releases/latest),
+download `Lectern-<version>-x86_64.AppImage` and/or `OVMS-Manager-<version>-x86_64.AppImage`, then:
+
+```bash
+chmod +x Lectern-*-x86_64.AppImage
+./Lectern-*-x86_64.AppImage                          # the app
+./Lectern-*-x86_64.AppImage transcribe -i ~/Lectures  # lectern-transcribe, the batch tool (--help for options)
+```
+
+Each AppImage carries its own Python, Qt and OpenVINO. Nothing is installed on your system, it does not
+need root, and it runs on any x86-64 distribution with glibc 2.34 or newer, the minimum of the Qt 6 wheels:
+Debian 12, Ubuntu 22.04, Fedora 35, RHEL/Alma/Rocky 9, openSUSE Tumbleweed, Arch and newer. To verify the
+download, compare it with `SHA256SUMS` from the same release (`sha256sum -c SHA256SUMS --ignore-missing`).
+
+- **Menu entry**: an AppImage does not add itself to the application menu. Use
+  [Gear Lever](https://flathub.org/apps/it.mijorus.gearlever) or
+  [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher) to integrate it, or the installers
+  below.
+- **What it still needs from your system**: the same things as the installers do. That is Podman or Docker
+  for OVMS Manager; `ffmpeg` and, for the GPU, the Intel compute runtime for Lectern; and `libxcb-cursor` on
+  X11 sessions (see [System packages](#system-packages-by-distribution)).
+- **The OVMS Manager Converter** is not included, because PyTorch alone would weigh several GB. Use the
+  installer with `--with-optimum` for it.
+- If your system cannot mount AppImages (FUSE missing, e.g. in some containers), run them with
+  `--appimage-extract-and-run`.
+- **Updating**: when the update banner appears, download the new AppImage and delete the old one. Your
+  notes, models and settings are kept.
+
+### Option 2: install from source
+
 ```bash
 git clone https://github.com/VarCode-ai/ai-app-local-openvino.git
 cd ai-app-local-openvino
@@ -272,10 +307,13 @@ ai-app-local-openvino/
 ├── common/                    # shared by every app of the ecosystem
 │   ├── ui_kit.py              # design tokens, themes, icons, command palette
 │   └── fonts/                 # Inter and Newsreader (SIL Open Font License)
+├── packaging/
+│   ├── build-appimage.sh      # builds the portable AppImages of the release
+│   └── AppRun                 # entry point inside each AppImage
 ├── tools/
 │   ├── check_translations.py  # checks that the translation catalogs are complete
 │   └── check_contrast.py      # checks the WCAG contrast of the theme colors
-├── .github/workflows/         # continuous integration: lint, translations, contrast
+├── .github/workflows/         # checks on every push, AppImages on every release tag
 └── docs/
     ├── images/                # screenshots
     └── troubleshooting.md

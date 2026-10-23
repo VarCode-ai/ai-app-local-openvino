@@ -104,8 +104,20 @@ needs three steps:
    [semantic version](https://semver.org/) for both, and add the changes to `CHANGELOG.md`.
 2. Commit, then tag with a `v` prefix and push the tag: `git tag -a v1.1.0 -m "1.1.0"` and
    `git push origin v1.1.0`.
-3. On GitHub, publish a release from that tag (not a draft, not a pre-release: the apps only see the
-   latest published release) and paste the CHANGELOG section as its notes.
+3. The *Release binaries* workflow starts when the tag arrives. It builds the AppImages and attaches them,
+   with `SHA256SUMS`, to the release of the tag, creating the release if needed. Then edit the release on
+   GitHub and paste the CHANGELOG section as its notes. It must be published, not a draft or a
+   pre-release: the apps only see the latest published release.
+
+To build the AppImages on your machine (about 1 GB of downloads the first time):
+
+```bash
+packaging/build-appimage.sh            # both apps into dist/
+packaging/build-appimage.sh lectern    # only one
+```
+
+For a tag that was released before the workflow existed, run *Release binaries* by hand from the
+Actions tab and type the tag.
 
 ## License
 

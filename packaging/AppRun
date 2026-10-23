@@ -1,0 +1,16 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Entry point of the AppImage: runs the app with the Python bundled inside it, isolated from the system one.
+#   ./Lectern-x.y.z-x86_64.AppImage                 the app
+#   ./Lectern-x.y.z-x86_64.AppImage transcribe …    lectern-transcribe (batch transcription; --help for options)
+HERE="$(dirname "$(readlink -f "$0")")"
+PYTHON="$HERE/usr/python/bin/python3"
+unset PYTHONHOME PYTHONPATH
+export PYTHONNOUSERSITE=1          # ignore packages installed in ~/.local
+export PYTHONDONTWRITEBYTECODE=1   # the AppImage is read-only
+export HF_HUB_DISABLE_TELEMETRY=1 DO_NOT_TRACK=1
+if [ "$1" = "transcribe" ] && [ -f "$HERE/usr/app/transcribe.py" ]; then
+    shift
+    exec "$PYTHON" "$HERE/usr/app/transcribe.py" "$@"
+fi
+exec "$PYTHON" "$HERE/usr/app/@SCRIPT@" "$@"
